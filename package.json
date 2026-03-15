@@ -5,19 +5,20 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "VENi - youssefv",
+  "license": "MIT",
   "dependencies": {
-    "chokidar": "^5.0.0",
-    "qs": "*",
-    "wa-sticker-formatter": "^4.3.2",
-    "whatsappy": "github:deveni0/ws",
+    "@img/sharp-wasm32": "^0.34.5",
     "cheerio": "1.0.0-rc.12",
+    "chokidar": "^5.0.0",
     "file-type": "^18.0.0",
-    "form-data": "^4.0.5"
+    "form-data": "^4.0.5",
+    "qs": "*",
+    "sharp": "^0.34.5",
+    "wa-sticker-formatter": "^4.3.2",
+    "whatsappy": "github:deveni0/ws"
   }
 }
