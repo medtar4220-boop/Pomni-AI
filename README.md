@@ -37,7 +37,7 @@ pkg update -y && pkg upgrade -y
 pkg install git nodejs -y
 git clone https://github.com/deveni0/Pomni-AI.git
 cd Pomni-AI
-npm install -y
+npm install
 npm start
 ```
 
