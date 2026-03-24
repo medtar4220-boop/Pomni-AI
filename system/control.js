@@ -1,9 +1,3 @@
-/* 
-لو عايز أشيل واحده منهم زي الترحيب ادي ل if بتاعها return اديلو أي قيمة موجب زي true أو حتي string 
-========================
-you wanna disable one of them (like the welcome), just make its if return something positive like true or even a string.
-*/
-
 import fs from "fs";
 import path from "path";
 
@@ -18,27 +12,31 @@ const group = async (ctx, event, eventType) => {
     const users = participants.length ? participants.map(p => '@' + p.split('@')[0]).join(' and ') : 'No users';
     const authorTag = author ? '@' + author.split('@')[0] : 'Unknown';
 
-    if (eventType === "add") txt = `♡゙ مـنـور/ه ${users}\nby ${authorTag}`;
-    else if (eventType === "remove") txt = `${users} تم إزالته من الجروب\nby ${authorTag}`;
+    if (eventType === "add") txt = `
+    ♡゙ مـنـور/ه ${users}${authorTag === users ? "" : `\n𝐛𝐲 ${authorTag}`}
+ `;
+    else if (eventType === "remove") txt = `
+${users} تم إزالته من الجروب${authorTag === users ? "" : `\n𝐛𝐲 ${authorTag}
+`}`;
     else if (eventType === "promote") txt = `♡゙ مـبـروك الادمـن ${users}\nby ${authorTag}`;
     else if (eventType === "demote") txt = `♡゙ بـقـيـت عـضـو خـلاص ${users}\nby ${authorTag}`;
     else return null;
     
-   
-        const filePath = path.join(process.cwd(), 'system', 'database.json');
-        const data = fs.readFileSync(filePath, 'utf8');
-        const database = JSON.parse(data);
-        if (database.settings[event.chat].noWelcome) return 99999 
+    const filePath = path.join(process.cwd(), 'system', 'database.json');
+    const data = fs.readFileSync(filePath, 'utf8');
+    const database = JSON.parse(data);
+    
+    if (database.settings?.[event.chat]?.noWelcome === true) return 9999;
 
     await ctx.sock.msgUrl(event.chat, txt, {
       img: ["remove", "add"].includes(eventType) ? (event.userUrl || "https://files.catbox.moe/hm9iq4.jpg") : "https://files.catbox.moe/hm9iq4.jpg",
       title: ctx.config?.info.nameBot || "WhatsApp Bot",
-      body: "A simple WhatsApp bot for beginners, by VENOM",
+      body: "𝐴 𝑠𝑖𝑚𝑝𝑙𝑒 𝑊𝒉𝑎𝑡𝑠𝐴𝑝𝑝 𝑏𝑜𝑡 𝑓𝑜𝑟 𝑏𝑒𝑔𝑖𝑛𝑛𝑒𝑟𝑠, 𝑏𝑦 𝑉𝐸𝑁𝑂𝑀",
       mentions: author ? [author, ...participants] : participants,
       newsletter: {
-      name: '𝐕𝐈𝐈7 ~ 𝐂𝐡𝐚𝐧𝐧𝐞𝐥 🕷️',
-      jid: '120363225356834044@newsletter'
-    },
+        name: '𝐕𝐈𝐈7 ~ 𝐂𝐡𝐚𝐧𝐧𝐞𝐥 🕷️',
+        jid: '120363225356834044@newsletter'
+      },
       big: ["remove", "add"].includes(eventType)
     });
   } catch (e) {
@@ -48,17 +46,71 @@ const group = async (ctx, event, eventType) => {
 };
 
 const access = async (msg, checkType, time) => {
-  const msgs = {
-    cooldown: `*♡⏳ استنى ${time || 'بعض كام ثانيه'} ثانية وكمل الأمر ⏳♡*`,
-    owner: "*♡ 🇩🇪 الأمر ده لـ المطورين فقط 🇩🇪♡*",
-    group: "*♡💠 الأمر ده بيشتغل بس ف الجروبات 💠♡*",
-    admin: "*♡📯 الأمر ده لـ الادمن فقط 📯♡*",
-    private: "*♡🏷️ الأمر ده في الخاص فقط 🏷️♡*",
-    botAdmin: "*♡📌 لازم اكون ادمن عشان انقذ الأمر 📌♡*",
-    disabled: "*♡🗃️ الامر متوقف (تحت صيانة) 🗃️♡*",
-    error: "*♡❌ الأمر فيه خطأ، كلم المطورين ❌♡*"
+  const conn = await msg.client();
+  const quoted = {
+    key: {
+      participant: `${msg.sender.split('@')[0]}@s.whatsapp.net`,
+      remoteJid: 'status@broadcast',
+      fromMe: false,
+    },
+    message: {
+      contactMessage: {
+        displayName: `${msg.pushName}`,
+        vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:${msg.pushName}\nitem1.TEL;waid=${msg.sender.split('@')[0]}:${msg.sender.split('@')[0]}\nEND:VCARD`,
+      },
+    },
+    participant: '0@s.whatsapp.net',
   };
-  if (msg.reply && msgs[checkType]) await msg.reply(msgs[checkType]);
+  
+  const msgs = {
+    cooldown: `
+*♡⏳ استنى ${time || 'بعض كام ثانيه'} ثانية وكمل الأمر ⏳♡*
+⊱⋅ ──────────── ⋅⊰
+> *_لازم تصبر شويه عشان الأمر ده مينفعش فيه الاسبام_*`,
+    owner: `
+*♡ 🇩🇪 الأمر ده لـ المطورين فقط 🇩🇪♡*
+⊱⋅ ──────────── ⋅⊰
+> *_الامر ده لـ المطورين البوت لازم تكون مطور عشان تقدر تستخدمه_`,
+    group: `
+*♡💠 الأمر ده بيشتغل بس ف الجروبات 💠♡*
+⊱⋅ ──────────── ⋅⊰
+> *_لازم الأمر ده تستخدمه ف جروب فقط ممنوع غير كده_*`,
+    admin: `
+*♡📯 الأمر ده لـ الادمن فقط 📯♡*
+⊱⋅ ──────────── ⋅⊰
+> *_انت مجرد عضو لازم تبقي ادمن يا عضو يا عبد_*`,
+    private: `
+*♡🏷️ الأمر ده في الخاص فقط 🏷️♡*
+⊱⋅ ──────────── ⋅⊰
+> *_الامر ف الخاص بس ياحبيبي_*`,
+    botAdmin: `
+*♡📌 لازم اكون ادمن عشان انقذ الأمر 📌♡*
+⊱⋅ ──────────── ⋅⊰
+> *_حطني ادمن عشان تقدر تستعمل الأمر ده_*`,
+    disabled: `
+*♡🗃️ الامر متوقف (تحت صيانة) 🗃️♡*
+⊱⋅ ──────────── ⋅⊰
+> *_الامر تحت صيانه قريباً بيشتغل تاني_*`,
+    error: `
+*♡❌ الأمر فيه خطأ، كلم المطورين ❌♡*
+⊱⋅ ──────────── ⋅⊰
+*_اكتب " .المطور " عشان يبعتلك رقم المطور_*`
+  };
+  
+  if (conn && msgs[checkType]) {
+   
+    await conn.msgUrl(msg.chat, msgs[checkType], {
+      img: "https://i.pinimg.com/originals/02/c3/51/02c351dfd4eb72a62f225ce964dc510d.jpg",
+      title: "𝐀𝐥𝐞𝐫𝐭𝐬 | 𝐖𝐚𝐫𝐧𝐢𝐧𝐠𝐬",
+      body: "𝐵𝑜𝑡 𝑎𝑙𝑒𝑟𝑡𝑠: 𝑅𝑒𝑎𝑑 𝑡𝒉𝑒 𝑚𝑒𝑠𝑠𝑎𝑔𝑒 𝑡𝑜 𝑙𝑒𝑎𝑟𝑛 𝑚𝑜𝑟𝑒",
+      newsletter: {
+        name: '𝐕𝐈𝐈7 ~ 𝐂𝐡𝐚𝐧𝐧𝐞𝐥 🕷️',
+        jid: '120363225356834044@newsletter'
+      },
+      big: false
+    }, quoted);
+    // await conn.sendMessage(msg.chat, { text: msgs[checkType] }, { quoted });
+  }
   return null;
 };
 
