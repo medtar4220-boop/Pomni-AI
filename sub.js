@@ -1,12 +1,12 @@
-import { SubBots } from "meowsab";
+import { SubBots } from "meowab";
 
 async function sub(client) {
  
   global.subBots = new SubBots(client.commandSystem);
-  const sub = global.subBots
+
   const { config } = client;
 
-  await sub.setConfig({
+  await global.subBots.setConfig({
     commandsPath: config.commandsPath || './commands',
     owners: config.owners,
     prefix: config.prefix,
@@ -14,34 +14,61 @@ async function sub(client) {
     printQR: false
   });
 
-  sub.on('error', (uid, error) => {
+  global.subBots.on('error', (uid, error) => {
     console.error(`❌ [SubBot ${uid}] Error:`, error?.message || error);
   });
 
   const loadedCount = await global.subBots.load();
   console.log(`✅ Loaded ${loadedCount} saved bots`);
 
-  sub.on('ready', async (uid, sock) => {
+  global.subBots.on('ready', async (uid, sock) => {
     console.log(`✅ [SubBot ${uid}] Connected!`);
   });
 
-  sub.on('pair', (uid, code) => {
+  global.subBots.on('pair', (uid, code) => {
     console.log(`🔐 [SubBot ${uid}] Pairing code: ${code}`);
   });
 
 
-  sub.on('message', async (uid, msg) => {
+  global.subBots.on('message', async (uid, msg) => {
+    if (msg.key.id.includes("3EB0")) return;
+
+    const body = getMessageText(msg);
+    const bot = global.subBots.get(uid);
+    const sock = bot?.sock;
+
+    if (!sock || !body) return;
+
+    try {
+      if (body === "تست") {
+        await sock.sendMessage(msg.key.remoteJid, {
+          text: "🤖 SubBots ~ VII7"
+        });
+      }
+
+    } catch (error) {
+      console.error(`❌ [SubBot ${uid}] Send error:`, error?.message || error);
+    }
   });
 
-  sub.on('close', (uid) => {
+  global.subBots.on('close', (uid) => {
     console.log(`🔌 [SubBot ${uid}] Disconnected`);
   });
 
-  sub.on('badSession', (uid) => {
-    console.log(`⚠️ [SubBot ${uid}] Bad session, removed`);
+  global.subBots.on('badSession', (uid) => {
+    console.log(`⚠️ [SubBot ${uid}] Bad session, removed`);م
   });
 
   return global.subBots;
+}
+
+function getMessageText(msg) {
+  if (!msg.message) return null;
+  if (msg.message.conversation) return msg.message.conversation;
+  if (msg.message.extendedTextMessage?.text) return msg.message.extendedTextMessage.text;
+  if (msg.message.imageMessage?.caption) return msg.message.imageMessage.caption;
+  if (msg.message.videoMessage?.caption) return msg.message.videoMessage.caption;
+  return msg.body || null;
 }
 
 export default sub;
