@@ -4,7 +4,7 @@ import UltraDB from "./system/UltraDB.js";
 import sub from './sub.js';
 
 /* =========== Client ========== */
-uconst client = new Client({
+const client = new Client({
   phoneNumber: '20123456789', // Bot number
   prefix: [".", "/", "!"],
   fromMe: false,
